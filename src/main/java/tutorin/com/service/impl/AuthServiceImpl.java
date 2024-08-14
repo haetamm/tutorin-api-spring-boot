@@ -4,11 +4,17 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.UserRoleEnum;
+import tutorin.com.entities.request.user.LoginRequest;
 import tutorin.com.entities.request.user.RegisterRequest;
+import tutorin.com.entities.response.user.LoginResponse;
 import tutorin.com.entities.response.user.RegisterResponse;
 import tutorin.com.model.Profile;
 import tutorin.com.model.Role;
@@ -76,6 +82,25 @@ public class AuthServiceImpl implements AuthService {
         validationUtil.validate(request);
         Role role = roleService.saveOrGet(UserRoleEnum.TUTOR);
         return getRegisterResponse(request, List.of(role));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public LoginResponse login(LoginRequest request) {
+        validationUtil.validate(request);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(request.getUsername(),
+                request.getPassword());
+
+        Authentication authenticate = authenticationManager.authenticate(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+
+        User user = (User) authenticate.getPrincipal();
+        String token = jwtService.generateToken(user);
+        return LoginResponse.builder()
+                .username(user.getUsername())
+                .token(token)
+                .roles(user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                .build();
     }
 
     private RegisterResponse getRegisterResponse(RegisterRequest request, List<Role> roles) {
