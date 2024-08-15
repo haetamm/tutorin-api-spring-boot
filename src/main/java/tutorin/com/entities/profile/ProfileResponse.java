@@ -2,8 +2,6 @@ package tutorin.com.entities.profile;
 
 import lombok.*;
 
-import java.util.List;
-
 @Setter
 @Getter
 @AllArgsConstructor

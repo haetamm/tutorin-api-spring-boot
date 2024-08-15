@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.WebErrorResponse;
+import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.InternalServerException;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.exception.ValidationCustomException;
@@ -31,6 +32,11 @@ public class ErrorController {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<WebErrorResponse<String>> handleNotFoundException(NotFoundException exception) {
         return createErrorResponse(HttpStatus.NOT_FOUND, exception.getMessage() != null ? exception.getMessage() : "Not Found");
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<WebErrorResponse<String>> handleBadRequestException(BadRequestException exception) {
+        return createErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage() != null ? exception.getMessage() : "Bad Request");
     }
 
     @ExceptionHandler(ValidationCustomException.class)

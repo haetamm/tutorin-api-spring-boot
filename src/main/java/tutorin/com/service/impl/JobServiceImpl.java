@@ -5,7 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.Gender;
-import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.job.JobRequest;
 import tutorin.com.entities.job.JobResponse;
 import tutorin.com.exception.NotFoundException;
@@ -66,8 +65,10 @@ public class JobServiceImpl implements JobService {
                 .collect(Collectors.toList());
     }
 
-    private Job findById(String id) throws NotFoundException {
-        return jobRepository.findById(id).orElseThrow(() -> new NotFoundException(StatusMessages.NOT_FOUND));
+    @Transactional(readOnly = true)
+    @Override
+    public Job findById(String id) throws NotFoundException {
+        return jobRepository.findById(id).orElseThrow(() -> new NotFoundException("Job not found"));
     }
 
     private JobResponse createJobResponse(Job job) {

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,6 @@ import tutorin.com.service.JobService;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping(ApiUrl.API_URL + ApiUrl.API_JOB)
 @RequiredArgsConstructor
@@ -30,7 +28,7 @@ public class JobController {
     private final Utilities utilities;
     private final JobService jobService;
 
-    @Operation(summary = "Create Job")
+    @Operation(summary = "Student create job")
     @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('ROLE_STUDENT')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,7 +42,7 @@ public class JobController {
         }, HttpStatus.CREATED, "Request tutor successfully");
     }
 
-    @Operation(summary = "Get All Job")
+    @Operation(summary = "Super admin and tutor get all Job")
     @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('ROLE_TUTOR', 'ROLE_ADMIN')")
     @GetMapping( path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -52,7 +50,7 @@ public class JobController {
         return utilities.handleRequest(jobService::getAllJob, HttpStatus.OK, StatusMessages.SUCCESS_RETRIEVE_LIST);
     }
 
-    @Operation(summary = "Get Job By id")
+    @Operation(summary = "Super admin and tutor get job by id")
     @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('ROLE_TUTOR', 'ROLE_ADMIN')")
     @GetMapping( path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
