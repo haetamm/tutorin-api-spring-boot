@@ -20,16 +20,11 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public User getByUserId(String id) {
-        try {
-            return userRepository.findById(id).orElseThrow(() -> new NotFoundException(StatusMessages.USER_NOT_FOUND));
-        } catch (NotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    public User getByUserId(String id) throws NotFoundException {
+        return findById(id);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+    private User findById(String id) throws NotFoundException {
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException(StatusMessages.USER_NOT_FOUND));
     }
 }

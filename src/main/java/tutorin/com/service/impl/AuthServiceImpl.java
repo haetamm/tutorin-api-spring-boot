@@ -19,6 +19,7 @@ import tutorin.com.entities.response.user.RegisterResponse;
 import tutorin.com.model.Profile;
 import tutorin.com.model.Role;
 import tutorin.com.model.User;
+import tutorin.com.repository.ProfileRepository;
 import tutorin.com.repository.UserRepository;
 import tutorin.com.service.AuthService;
 import tutorin.com.service.JwtService;
@@ -38,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final ValidationUtil validationUtil;
-
+    private final ProfileRepository profileRepository;
 
     @Value("${tutorin_api.super-admin.name}")
     private String superAdminName;
@@ -56,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (account.isPresent())
             return;
-        Role admin = roleService.saveOrGet(UserRoleEnum.ADMIN);
+        Role admin = roleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
 
         userRepository.saveAndFlush(User.builder()
                 .name(superAdminName)
@@ -72,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse registerStudent(RegisterRequest request) {
         validationUtil.validate(request);
-        Role role = roleService.saveOrGet(UserRoleEnum.STUDENT);
+        Role role = roleService.saveOrGet(UserRoleEnum.ROLE_STUDENT);
         return getRegisterResponse(request, List.of(role));
     }
 
@@ -80,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponse registerTutor(RegisterRequest request) {
         validationUtil.validate(request);
-        Role role = roleService.saveOrGet(UserRoleEnum.TUTOR);
+        Role role = roleService.saveOrGet(UserRoleEnum.ROLE_TUTOR);
         return getRegisterResponse(request, List.of(role));
     }
 
@@ -114,6 +115,16 @@ public class AuthServiceImpl implements AuthService {
                 .roles(roles)
                 .isEnable(true)
                 .build());
+
+        Profile profile = Profile.builder()
+                .user(user)
+                .phone("")  // Default empty or null values
+                .address("")
+                .city("")
+                .country("")
+                .postcode("")
+                .build();
+        profileRepository.save(profile);
 
         List<String> rolesName = user.getRoles().stream()
                 .map(role -> role.getRole().name())

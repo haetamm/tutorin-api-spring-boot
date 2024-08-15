@@ -1,7 +1,7 @@
 package tutorin.com.constant;
 
 public enum UserRoleEnum {
-    ADMIN,
-    STUDENT,
-    TUTOR
+    ROLE_ADMIN,
+    ROLE_STUDENT,
+    ROLE_TUTOR
 }

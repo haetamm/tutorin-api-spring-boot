@@ -1,8 +1,8 @@
 package tutorin.com.service;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
+import tutorin.com.exception.NotFoundException;
 import tutorin.com.model.User;
 
-public interface UserService extends UserDetailsService {
-    User getByUserId(String id);
+public interface UserService {
+    User getByUserId(String id) throws NotFoundException;
 }
