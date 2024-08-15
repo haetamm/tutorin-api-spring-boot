@@ -12,6 +12,5 @@ public class ValidationCustomException extends Exception {
         super(message);
         this.path = path;
     }
-
 }
 

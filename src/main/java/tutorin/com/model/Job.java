@@ -9,7 +9,8 @@ import lombok.Setter;
 import tutorin.com.constant.Gender;
 import tutorin.com.constant.TableName;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.sql.Timestamp;
 
 @Setter
@@ -61,11 +62,20 @@ public class Job {
     private String description;
 
     @Column(name = "createdAt", nullable = false, updatable = false)
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updatedAt")
     private Timestamp updatedAt;
 
-    // Constructors, equals, and hashCode methods
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = new Timestamp(System.currentTimeMillis());
+    }
+
 
 }

@@ -10,13 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WebResponse<T> {
-
     private int code;
-
     private String status;
-
     private T data;
-
     private PaginationResponse paginationResponse;
 
 }

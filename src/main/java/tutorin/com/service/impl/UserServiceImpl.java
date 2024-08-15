@@ -18,7 +18,7 @@ import tutorin.com.service.UserService;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(readOnly = true)
     @Override
     public User getByUserId(String id) throws NotFoundException {
         return findById(id);

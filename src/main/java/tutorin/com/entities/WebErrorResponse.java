@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WebErrorResponse<T> {
-
     private int code;
     private String status;
     private T message;

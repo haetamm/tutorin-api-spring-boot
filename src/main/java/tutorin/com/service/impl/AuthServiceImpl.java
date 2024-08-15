@@ -12,10 +12,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.UserRoleEnum;
-import tutorin.com.entities.request.user.LoginRequest;
-import tutorin.com.entities.request.user.RegisterRequest;
-import tutorin.com.entities.response.user.LoginResponse;
-import tutorin.com.entities.response.user.RegisterResponse;
+import tutorin.com.entities.user.LoginRequest;
+import tutorin.com.entities.user.RegisterRequest;
+import tutorin.com.entities.user.LoginResponse;
+import tutorin.com.entities.user.RegisterResponse;
 import tutorin.com.model.Profile;
 import tutorin.com.model.Role;
 import tutorin.com.model.User;
@@ -28,7 +28,6 @@ import tutorin.com.validation.ValidationUtil;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,8 +54,8 @@ public class AuthServiceImpl implements AuthService {
     public void initSuperAdmin() {
         Optional<User> account = userRepository.findByUsername(superAdminUsername);
 
-        if (account.isPresent())
-            return;
+        if (account.isPresent()) return;
+
         Role admin = roleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
 
         userRepository.saveAndFlush(User.builder()
@@ -118,7 +117,7 @@ public class AuthServiceImpl implements AuthService {
 
         Profile profile = Profile.builder()
                 .user(user)
-                .phone("")  // Default empty or null values
+                .phone("")
                 .address("")
                 .city("")
                 .country("")

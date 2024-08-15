@@ -1,4 +1,4 @@
-package tutorin.com.entities.request.profile;
+package tutorin.com.entities.profile;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

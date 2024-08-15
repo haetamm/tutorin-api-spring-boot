@@ -5,8 +5,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.StatusMessages;
-import tutorin.com.entities.request.profile.ProfileRequest;
-import tutorin.com.entities.response.profile.ProfileResponse;
+import tutorin.com.entities.profile.ProfileRequest;
+import tutorin.com.entities.profile.ProfileResponse;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.model.Profile;
@@ -34,7 +34,7 @@ public class ProfileServiceImpl implements ProfileService {
         return createProfileResponse(profile);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(readOnly = true)
     @Override
     public ProfileResponse getProfile() throws NotFoundException {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -44,7 +44,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private Profile getProfileByUserId(String userId) throws NotFoundException {
-        return profileRepository.findByUserId(userId).orElseThrow(() -> new NotFoundException("Profile not found"));
+        return profileRepository.findByUserId(userId).orElseThrow(() -> new NotFoundException(StatusMessages.NOT_FOUND));
     }
 
     private void updateUserData(ProfileRequest request, Profile profile) throws ValidationCustomException {
@@ -70,7 +70,7 @@ public class ProfileServiceImpl implements ProfileService {
     private void updateEmailIfChange(String newEmail, Profile profile) throws ValidationCustomException {
         if (newEmail != null && !newEmail.isBlank() && !newEmail.equals(profile.getUser().getEmail())) {
             if (userRepository.existsByEmail(newEmail)) {
-                throw new ValidationCustomException(StatusMessages.EMAIL_TAKEN, "email");
+                throw new ValidationCustomException(StatusMessages.EMAIL_BEEN_TAKEN, "email");
             }
             profile.getUser().setEmail(newEmail);
         }

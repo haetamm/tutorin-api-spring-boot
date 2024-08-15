@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import tutorin.com.constant.ApiUrl;
 import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.WebResponse;
-import tutorin.com.entities.request.user.LoginRequest;
-import tutorin.com.entities.request.user.RegisterRequest;
-import tutorin.com.entities.response.user.LoginResponse;
-import tutorin.com.entities.response.user.RegisterResponse;
+import tutorin.com.entities.user.LoginRequest;
+import tutorin.com.entities.user.RegisterRequest;
+import tutorin.com.entities.user.LoginResponse;
+import tutorin.com.entities.user.RegisterResponse;
 import tutorin.com.helper.Utilities;
 import tutorin.com.service.AuthService;
 

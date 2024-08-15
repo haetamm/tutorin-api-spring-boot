@@ -1,4 +1,4 @@
-package tutorin.com.entities.request.user;
+package tutorin.com.entities.user;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;

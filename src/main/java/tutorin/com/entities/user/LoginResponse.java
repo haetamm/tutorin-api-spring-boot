@@ -1,4 +1,4 @@
-package tutorin.com.entities.response.user;
+package tutorin.com.entities.user;
 
 import lombok.*;
 

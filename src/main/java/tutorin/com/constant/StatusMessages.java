@@ -14,7 +14,7 @@ public class StatusMessages {
     public static final String ACCESS_DENIED = "Access Denied";
     public static final String ERROR_INVALID_JWT = "Invalid JWT";
     public static final String ERROR_CREATING_JWT = "Error creating JWT";
-    public static final String EMAIL_TAKEN = "Email has already been taken";
+    public static final String EMAIL_BEEN_TAKEN = "Email has already been taken";
     public static final String USERNAME_BEEN_TAKEN = "Username has already been taken";
 
 }
