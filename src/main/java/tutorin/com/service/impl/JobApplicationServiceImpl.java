@@ -1,5 +1,6 @@
 package tutorin.com.service.impl;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +12,7 @@ import tutorin.com.entities.job_application.JobApplicationResponse;
 import tutorin.com.entities.job_application.UpdateJobApplicationRequest;
 import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.NotFoundException;
+import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.model.Job;
 import tutorin.com.model.JobApplication;
 import tutorin.com.model.User;
@@ -19,6 +21,8 @@ import tutorin.com.service.JobApplicationService;
 import tutorin.com.service.JobService;
 import tutorin.com.service.UserService;
 import tutorin.com.validation.ValidationUtil;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +34,16 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public JobApplicationResponse createJobApplication(JobApplicationRequest request) throws NotFoundException {
+    public JobApplicationResponse createJobApplication(JobApplicationRequest request) throws NotFoundException, BadRequestException {
         validationUtil.validate(request);
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.getByUserId(userId);
         Job job = jobService.findById(request.getJobId());
+
+        Optional<JobApplication> existingApplication = jobApplicationRepository.findByJobIdAndTutorId(job.getId(), user.getId());
+        if (existingApplication.isPresent()) {
+            throw new BadRequestException("You have already applied for this job.");
+        }
 
         JobApplication jobApplication = JobApplication.builder()
                 .job(job)

@@ -3,7 +3,7 @@ package tutorin.com.entities.job_application;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import tutorin.com.annotation.job_application.ValidStatus;
+import tutorin.com.annotation.job.ValidEnum;
 import tutorin.com.constant.Status;
 
 @Setter
@@ -19,6 +19,6 @@ public class UpdateJobApplicationRequest {
     private String tutorId;
 
     @NotNull(message = "Status cannot be null")
-    @ValidStatus(enumClass = Status.class, message = "Invalid status value")
+    @ValidEnum(enumClass = Status.class, message = "Invalid status value")
     private String status;
 }

@@ -16,6 +16,7 @@ import tutorin.com.entities.job_application.JobApplicationResponse;
 import tutorin.com.entities.job_application.UpdateJobApplicationRequest;
 import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.NotFoundException;
+import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.helper.Utilities;
 import tutorin.com.service.JobApplicationService;
 
@@ -35,7 +36,7 @@ public class JobApplicationController {
         return utilities.handleRequest(() -> {
             try {
                 return jobApplicationService.createJobApplication(request);
-            } catch (NotFoundException e) {
+            } catch (NotFoundException | BadRequestException e) {
                 throw new RuntimeException(e);
             }
         }, HttpStatus.CREATED, "Application submitted successfully.");

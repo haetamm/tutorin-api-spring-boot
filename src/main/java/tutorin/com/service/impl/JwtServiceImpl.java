@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -19,36 +20,35 @@ import tutorin.com.service.JwtService;
 import java.time.Instant;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class JwtServiceImpl implements JwtService {
-    private final String JWT_SECRET;
-    private final String JWT_ISSUER;
-    private final long JWT_EXPIRATION;
 
-    public JwtServiceImpl(@Value("${tutorin_api.jwt.secret}") String JWT_SECRET,
-                          @Value("${tutorin_api.jwt.issuer}") String JWT_ISSUER,
-                          @Value("${tutorin_api.jwt.expiration}") long JWT_EXPIRATION) {
-        this.JWT_SECRET = JWT_SECRET;
-        this.JWT_ISSUER = JWT_ISSUER;
-        this.JWT_EXPIRATION = JWT_EXPIRATION;
-    }
+   @Value("${tutorin_api.jwt.secret}")
+   private String JWT_SECRET;
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public String generateToken(User user) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC512(JWT_SECRET);
-            return JWT.create()
-                    .withSubject(user.getId())
-                    .withIssuedAt(Instant.now())
-                    .withExpiresAt(Instant.now().plusSeconds(JWT_EXPIRATION))
-                    .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
-                    .withIssuer(JWT_ISSUER)
-                    .sign(algorithm);
-        }catch (JWTCreationException e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, StatusMessages.ERROR_CREATING_JWT);
-        }
-    }
+   @Value("${tutorin_api.jwt.issuer}")
+   private String JWT_ISSUER;
+   @Value("${tutorin_api.jwt.expiration}")
+   private long JWT_EXPIRATION;
+
+
+   @Transactional(rollbackFor = Exception.class)
+   @Override
+   public String generateToken(User user) {
+       try {
+           Algorithm algorithm = Algorithm.HMAC512(JWT_SECRET);
+           return JWT.create()
+                   .withSubject(user.getId())
+                   .withIssuedAt(Instant.now())
+                   .withExpiresAt(Instant.now().plusSeconds(JWT_EXPIRATION))
+                   .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                   .withIssuer(JWT_ISSUER)
+                   .sign(algorithm);
+       }catch (JWTCreationException e){
+           throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, StatusMessages.ERROR_CREATING_JWT);
+       }
+   }
 
     @Transactional(rollbackFor = Exception.class)
     @Override

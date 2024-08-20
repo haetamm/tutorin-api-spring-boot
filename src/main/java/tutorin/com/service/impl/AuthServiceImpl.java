@@ -56,16 +56,11 @@ public class AuthServiceImpl implements AuthService {
 
         if (account.isPresent()) return;
 
+        RegisterRequest superAdminRequest = new RegisterRequest(superAdminName, superAdminUsername, superAdminEmail, superAdminPassword);
+
         Role admin = roleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
 
-        userRepository.saveAndFlush(User.builder()
-                .name(superAdminName)
-                .username(superAdminUsername)
-                .email(superAdminEmail)
-                .password(passwordEncoder.encode(superAdminPassword))
-                .roles(List.of(admin))
-                .isEnable(true)
-                .build());
+        saveToUserRepository(superAdminRequest, List.of(admin));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -103,17 +98,20 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    private RegisterResponse getRegisterResponse(RegisterRequest request, List<Role> roles) {
-        String hashedPassword = passwordEncoder.encode(request.getPassword());
-
-        User user = userRepository.saveAndFlush(User.builder()
-                .name(request.getName())
-                .username(request.getUsername())
-                .email(request.getEmail())
+    private User saveToUserRepository(RegisterRequest user, List<Role> roles) {
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        return userRepository.saveAndFlush(User.builder()
+                .name(user.getName())
+                .username(user.getUsername())
+                .email(user.getEmail())
                 .password(hashedPassword)
                 .roles(roles)
                 .isEnable(true)
                 .build());
+    }
+
+    private RegisterResponse getRegisterResponse(RegisterRequest request, List<Role> roles) {
+        User user = saveToUserRepository(request, roles);
 
         Profile profile = Profile.builder()
                 .user(user)
