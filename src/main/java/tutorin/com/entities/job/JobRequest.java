@@ -16,7 +16,7 @@ import java.util.Date;
 public class JobRequest {
 
     @NotBlank(message = "Title cannot be blank")
-    @Size(max = 30, message = "Title must not exceed 255 characters")
+    @Size(max = 255, message = "Title must not exceed 255 characters")
     private String title;
 
     @NotBlank(message = "Subject cannot be blank")
@@ -48,7 +48,7 @@ public class JobRequest {
     private String country;
 
     @NotBlank(message = "Salary cannot be blank")
-    @Size(max = 100, message = "Salary must not exceed 100 characters")
+    @Size(max = 255, message = "Salary must not exceed 255 characters")
     private String salary;
 
     @NotBlank(message = "Description cannot be blank")

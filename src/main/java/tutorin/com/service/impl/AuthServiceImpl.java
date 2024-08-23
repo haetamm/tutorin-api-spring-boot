@@ -53,13 +53,9 @@ public class AuthServiceImpl implements AuthService {
     @PostConstruct
     public void initSuperAdmin() {
         Optional<User> account = userRepository.findByUsername(superAdminUsername);
-
         if (account.isPresent()) return;
-
         RegisterRequest superAdminRequest = new RegisterRequest(superAdminName, superAdminUsername, superAdminEmail, superAdminPassword);
-
         Role admin = roleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
-
         saveToUserRepository(superAdminRequest, List.of(admin));
     }
 
@@ -83,6 +79,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
         validationUtil.validate(request);
+        System.out.println(request.getUsername());
+        System.out.println(request.getPassword());
         Authentication authentication = new UsernamePasswordAuthenticationToken(request.getUsername(),
                 request.getPassword());
 
@@ -92,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
         User user = (User) authenticate.getPrincipal();
         String token = jwtService.generateToken(user);
         return LoginResponse.builder()
+                .name(user.getName())
                 .username(user.getUsername())
                 .token(token)
                 .roles(user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
@@ -128,6 +127,7 @@ public class AuthServiceImpl implements AuthService {
                 .toList();
 
         return RegisterResponse.builder()
+                .name(user.getName())
                 .username(user.getUsername())
                 .roles(rolesName)
                 .build();

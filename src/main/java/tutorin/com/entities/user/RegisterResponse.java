@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class RegisterResponse {
+    private String name;
     private String username;
     private List<String> roles;
 }

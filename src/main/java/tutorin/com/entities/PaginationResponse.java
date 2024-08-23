@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PaginationResponse {
     private Integer totalPages;
-    private Long totalElement;
+    private Long totalElements;
     private Integer page;
     private Integer size;
     private Boolean hasNext;

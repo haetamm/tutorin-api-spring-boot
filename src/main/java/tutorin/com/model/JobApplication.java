@@ -9,6 +9,8 @@ import lombok.Setter;
 import tutorin.com.constant.Status;
 import tutorin.com.constant.TableName;
 
+import java.time.LocalDateTime;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -33,5 +35,23 @@ public class JobApplication {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
+
+    @Column(name = "createdAt", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updatedAt", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
 }

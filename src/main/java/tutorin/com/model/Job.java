@@ -64,18 +64,19 @@ public class Job {
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updatedAt")
-    private Timestamp updatedAt;
+    @Column(name = "updatedAt", nullable = false)
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = new Timestamp(System.currentTimeMillis());
+        updatedAt = LocalDateTime.now();
     }
-
 
 }

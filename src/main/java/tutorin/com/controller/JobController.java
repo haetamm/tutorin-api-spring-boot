@@ -28,6 +28,18 @@ public class JobController {
     private final Utilities utilities;
     private final JobService jobService;
 
+
+    @Operation(summary = "Super admin and tutor get all Job")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('ROLE_TUTOR', 'ROLE_ADMIN')")
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<WebResponse<List<JobResponse>>> getAllJob(
+            @RequestParam(name = "page", defaultValue = "1") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size
+    ) {
+        return jobService.getAllJob(page, size);
+    }
+
     @Operation(summary = "Student create job")
     @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('ROLE_STUDENT')")
@@ -40,14 +52,6 @@ public class JobController {
                 throw new RuntimeException(e);
             }
         }, HttpStatus.CREATED, "Request tutor successfully");
-    }
-
-    @Operation(summary = "Super admin and tutor get all Job")
-    @SecurityRequirement(name = "Authorization")
-    @PreAuthorize("hasAnyRole('ROLE_TUTOR', 'ROLE_ADMIN')")
-    @GetMapping( path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<WebResponse<List<JobResponse>>> getAllJob() {
-        return utilities.handleRequest(jobService::getAllJob, HttpStatus.OK, StatusMessages.SUCCESS_RETRIEVE_LIST);
     }
 
     @Operation(summary = "Super admin and tutor get job by id")

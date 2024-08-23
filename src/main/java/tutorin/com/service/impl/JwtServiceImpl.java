@@ -3,6 +3,7 @@ package tutorin.com.service.impl;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ public class JwtServiceImpl implements JwtService {
                    .withIssuedAt(Instant.now())
                    .withExpiresAt(Instant.now().plusSeconds(JWT_EXPIRATION))
                    .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                   .withClaim("name", user.getName())
                    .withIssuer(JWT_ISSUER)
                    .sign(algorithm);
        }catch (JWTCreationException e){
@@ -55,9 +57,9 @@ public class JwtServiceImpl implements JwtService {
     public boolean verifyJwtToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC512(JWT_SECRET);
-            algorithm.verify(JWT.require(algorithm).build().verify(parseToken(token)));
+            DecodedJWT decodedJWT = JWT.require(algorithm).withIssuer(JWT_ISSUER).build().verify(parseToken(token));
             return true;
-        } catch (JWTCreationException e) {
+        } catch (JWTVerificationException e) {
             log.error("Invalid JWT Signature/Claims : {}", e.getMessage());
             return false;
         }
@@ -73,11 +75,12 @@ public class JwtServiceImpl implements JwtService {
                     .userId(decodedJWT.getSubject())
                     .roles(decodedJWT.getClaim("roles").asList(String.class))
                     .build();
-        } catch (JWTCreationException e){
+        } catch (JWTVerificationException e){
             log.error("Invalid JWT Signature/Claims : {}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, StatusMessages.ERROR_CREATING_JWT);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, StatusMessages.UNAUTHORIZED);
         }
     }
+
 
     private String parseToken(String bearerToken) {
         return bearerToken.replace("Bearer ", "");

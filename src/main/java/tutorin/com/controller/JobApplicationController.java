@@ -10,15 +10,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tutorin.com.constant.ApiUrl;
+import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.WebResponse;
 import tutorin.com.entities.job_application.JobApplicationRequest;
 import tutorin.com.entities.job_application.JobApplicationResponse;
+import tutorin.com.entities.job_application.ListJobApplicationResponse;
 import tutorin.com.entities.job_application.UpdateJobApplicationRequest;
 import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.NotFoundException;
-import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.helper.Utilities;
 import tutorin.com.service.JobApplicationService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(ApiUrl.API_URL + ApiUrl.API_JOB_APPLICATION)
@@ -27,6 +30,14 @@ import tutorin.com.service.JobApplicationService;
 public class JobApplicationController {
     private final Utilities utilities;
     private final JobApplicationService jobApplicationService;
+
+    @Operation(summary = "Tutor get job application")
+    @SecurityRequirement(name = "Authorization")
+    @PreAuthorize("hasAnyRole('ROLE_TUTOR')")
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<WebResponse<List<ListJobApplicationResponse>>> getJobApplication() {
+        return utilities.handleRequest(jobApplicationService::getJobApplication, HttpStatus.OK, StatusMessages.SUCCESS_RETRIEVE_LIST);
+    }
 
     @Operation(summary = "Tutor create job application (apply job)")
     @SecurityRequirement(name = "Authorization")

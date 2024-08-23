@@ -9,10 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.WebErrorResponse;
-import tutorin.com.exception.BadRequestException;
-import tutorin.com.exception.InternalServerException;
-import tutorin.com.exception.NotFoundException;
-import tutorin.com.exception.ValidationCustomException;
+import tutorin.com.exception.*;
 
 import java.util.List;
 import java.util.Map;
@@ -37,6 +34,11 @@ public class ErrorController {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<WebErrorResponse<String>> handleBadRequestException(BadRequestException exception) {
         return createErrorResponse(HttpStatus.BAD_REQUEST, exception.getMessage() != null ? exception.getMessage() : "Bad Request");
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<WebErrorResponse<String>> handleUnauthorizedException(UnauthorizedException exception) {
+        return createErrorResponse(HttpStatus.UNAUTHORIZED, exception.getMessage() != null ? exception.getMessage() : "Unauthorized");
     }
 
     @ExceptionHandler(ValidationCustomException.class)
@@ -75,7 +77,7 @@ public class ErrorController {
         WebErrorResponse<T> response = new WebErrorResponse<>();
         response.setCode(status.value());
         response.setStatus(status.name());
-        response.setMessage(data);
+        response.setMessages(data);
         return ResponseEntity.status(status).body(response);
     }
 }

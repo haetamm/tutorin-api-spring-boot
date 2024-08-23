@@ -1,15 +1,24 @@
 package tutorin.com.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.Gender;
+import tutorin.com.constant.StatusMessages;
+import tutorin.com.entities.PaginationResponse;
+import tutorin.com.entities.WebResponse;
 import tutorin.com.entities.job.JobRequest;
 import tutorin.com.entities.job.JobResponse;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.model.Job;
 import tutorin.com.model.User;
+import tutorin.com.repository.JobApplicationRepository;
 import tutorin.com.repository.JobRepository;
 import tutorin.com.service.JobService;
 import tutorin.com.service.UserService;
@@ -24,6 +33,7 @@ public class JobServiceImpl implements JobService {
     private final ValidationUtil validationUtil;
     private final JobRepository jobRepository;
     private final UserService userService;
+    private final JobApplicationRepository jobApplicationRepository;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -58,11 +68,31 @@ public class JobServiceImpl implements JobService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<JobResponse> getAllJob() {
-        List<Job> jobs = jobRepository.findAll();
-        return jobs.stream()
+    public ResponseEntity<WebResponse<List<JobResponse>>> getAllJob(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Job> jobPage = jobRepository.findAll(pageable);
+        
+        List<JobResponse> jobResponses = jobPage.stream()
                 .map(this::createJobResponse)
                 .collect(Collectors.toList());
+
+        WebResponse<List<JobResponse>> response = WebResponse.<List<JobResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .status(StatusMessages.SUCCESS_RETRIEVE_LIST)
+                .data(jobResponses)
+                .paginationResponse(
+                        PaginationResponse.builder()
+                                .totalPages(jobPage.getTotalPages())
+                                .totalElements(jobPage.getTotalElements())
+                                .page(page)
+                                .size(size)
+                                .hasNext(jobPage.hasNext())
+                                .hasPrevious(jobPage.hasPrevious())
+                                .build()
+                )
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @Transactional(readOnly = true)
@@ -72,14 +102,16 @@ public class JobServiceImpl implements JobService {
     }
 
     private JobResponse createJobResponse(Job job) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean hasApplied = jobApplicationRepository.findByJobIdAndTutorId(job.getId(), userId).isPresent();
         return JobResponse.builder()
                 .id(job.getId())
-                .studentId(job.getStudent().getId())
+                .applied(hasApplied)
                 .title(job.getTitle())
                 .subject(job.getSubject())
                 .gender(String.valueOf(job.getGender()))
                 .education(job.getEducation())
-                .deadline(job.getDeadline())
+                .deadline(String.valueOf(job.getDeadline()))
                 .address(job.getAddress())
                 .city(job.getCity())
                 .country(job.getCountry())

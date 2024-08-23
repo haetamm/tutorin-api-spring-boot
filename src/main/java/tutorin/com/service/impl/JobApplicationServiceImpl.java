@@ -1,6 +1,5 @@
 package tutorin.com.service.impl;
 
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,10 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.Status;
 import tutorin.com.entities.job_application.JobApplicationRequest;
 import tutorin.com.entities.job_application.JobApplicationResponse;
+import tutorin.com.entities.job_application.ListJobApplicationResponse;
 import tutorin.com.entities.job_application.UpdateJobApplicationRequest;
 import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.NotFoundException;
-import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.model.Job;
 import tutorin.com.model.JobApplication;
 import tutorin.com.model.User;
@@ -22,6 +21,7 @@ import tutorin.com.service.JobService;
 import tutorin.com.service.UserService;
 import tutorin.com.validation.ValidationUtil;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,6 +31,17 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     private final JobApplicationRepository jobApplicationRepository;
     private final JobService jobService;
     private final UserService userService;
+
+    @Override
+    public List<ListJobApplicationResponse> getJobApplication() {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<JobApplication> jobApplications = jobApplicationRepository.findAllByTutorId(userId);
+
+        return jobApplications.stream()
+                .map(this::createListJobApplicationResponse)
+                .toList();
+    }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -53,11 +64,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
         jobApplication = jobApplicationRepository.saveAndFlush(jobApplication);
 
-        return JobApplicationResponse.builder()
-                .jobId(jobApplication.getJob().getId())
-                .tutorId(jobApplication.getTutor().getId())
-                .status(String.valueOf(jobApplication.getStatus()))
-                .build();
+        return createJobApplicationResponse(jobApplication);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -86,10 +93,24 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
         jobApplicationRepository.saveAndFlush(jobApplication);
 
+        return createJobApplicationResponse(jobApplication);
+    }
+
+    private JobApplicationResponse createJobApplicationResponse(JobApplication jobApplication) {
         return JobApplicationResponse.builder()
                 .jobId(jobApplication.getJob().getId())
                 .tutorId(jobApplication.getTutor().getId())
                 .status(String.valueOf(jobApplication.getStatus()))
+                .build();
+    }
+
+    private ListJobApplicationResponse createListJobApplicationResponse(JobApplication jobApplication) {
+        return ListJobApplicationResponse.builder()
+                .jobId(jobApplication.getJob().getId())
+                .title(jobApplication.getJob().getTitle())
+                .subject(jobApplication.getJob().getSubject())
+                .status(String.valueOf(jobApplication.getStatus()))
+                .deadline(String.valueOf(jobApplication.getJob().getDeadline()))
                 .build();
     }
 }

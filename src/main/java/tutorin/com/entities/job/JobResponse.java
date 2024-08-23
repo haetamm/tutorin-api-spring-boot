@@ -11,12 +11,12 @@ import java.util.Date;
 @Builder
 public class JobResponse {
     private String id;
-    private String studentId;
+    private Boolean applied;
     private String title;
     private String subject;
     private String gender;
     private String education;
-    private Date deadline;
+    private String deadline;
     private String address;
     private String city;
     private String country;

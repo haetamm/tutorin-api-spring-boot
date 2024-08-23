@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 public class WebErrorResponse<T> {
     private int code;
     private String status;
-    private T message;
+    private T messages;
 }
