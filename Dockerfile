@@ -1,7 +1,8 @@
 #
 # Build stage
 #
-FROM maven:3.8.7-eclipse-temurin-22-slim AS build
+FROM eclipse-temurin:22-jdk AS build
+RUN apt-get update && apt-get install -y maven
 COPY src /home/app/src
 COPY pom.xml /home/app
 RUN mvn -f /home/app/pom.xml clean package
@@ -9,7 +10,7 @@ RUN mvn -f /home/app/pom.xml clean package
 #
 # Package stage
 #
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:22-jre-slim
 COPY --from=build /home/app/target/getyourway-0.0.1-SNAPSHOT.jar /usr/local/lib/demo.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/usr/local/lib/demo.jar"]
