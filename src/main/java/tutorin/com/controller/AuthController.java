@@ -8,17 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tutorin.com.constant.ApiUrl;
 import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.WebResponse;
-import tutorin.com.entities.user.LoginRequest;
-import tutorin.com.entities.user.RegisterRequest;
-import tutorin.com.entities.user.LoginResponse;
-import tutorin.com.entities.user.RegisterResponse;
+import tutorin.com.entities.user.*;
+import tutorin.com.exception.BadRequestException;
+import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.helper.Utilities;
 import tutorin.com.service.AuthService;
 
@@ -49,5 +45,31 @@ public class AuthController {
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<WebResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
         return utilities.handleRequest(() -> authService.login(request), HttpStatus.OK, StatusMessages.SUCCESS_LOGIN);
+    }
+
+    @Operation(summary = "User forgot password")
+    @SecurityRequirement(name = "Authorization")
+    @PostMapping(path = "/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<WebResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return utilities.handleRequest(() -> {
+            try {
+                return authService.forgetPassword(request);
+            } catch (ValidationCustomException e) {
+                throw new RuntimeException(e);
+            }
+        }, HttpStatus.OK, "Success");
+    }
+
+    @Operation(summary = "User reset password")
+    @SecurityRequirement(name = "Authorization")
+    @PostMapping(path = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<WebResponse<String>> resetPassword(@RequestParam("token") String token, @RequestBody ResetPasswordRequest request) {
+        return utilities.handleRequest(() -> {
+            try {
+                return authService.resetPassword(token, request);
+            } catch (ValidationCustomException | BadRequestException e) {
+                throw new RuntimeException(e);
+            }
+        }, HttpStatus.OK, "Success");
     }
 }

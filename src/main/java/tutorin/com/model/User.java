@@ -42,6 +42,9 @@ public class User  implements UserDetails {
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Role> roles;
 
+    @Column(name = "resetPasswordToken", columnDefinition = "TEXT")
+    private String resetPasswordToken;
+
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

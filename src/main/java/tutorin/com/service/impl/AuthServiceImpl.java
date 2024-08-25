@@ -3,6 +3,8 @@ package tutorin.com.service.impl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,11 +13,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tutorin.com.constant.StatusMessages;
 import tutorin.com.constant.UserRoleEnum;
-import tutorin.com.entities.user.LoginRequest;
-import tutorin.com.entities.user.RegisterRequest;
-import tutorin.com.entities.user.LoginResponse;
-import tutorin.com.entities.user.RegisterResponse;
+import tutorin.com.entities.user.*;
+import tutorin.com.exception.BadRequestException;
+import tutorin.com.exception.NotFoundException;
+import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.model.Profile;
 import tutorin.com.model.Role;
 import tutorin.com.model.User;
@@ -28,6 +31,7 @@ import tutorin.com.validation.ValidationUtil;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final ValidationUtil validationUtil;
     private final ProfileRepository profileRepository;
+    private final JavaMailSender mailSender;
 
     @Value("${tutorin_api.super-admin.name}")
     private String superAdminName;
@@ -79,8 +84,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
         validationUtil.validate(request);
-        System.out.println(request.getUsername());
-        System.out.println(request.getPassword());
         Authentication authentication = new UsernamePasswordAuthenticationToken(request.getUsername(),
                 request.getPassword());
 
@@ -95,6 +98,38 @@ public class AuthServiceImpl implements AuthService {
                 .token(token)
                 .roles(user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String forgetPassword(ForgotPasswordRequest request) throws ValidationCustomException {
+        validationUtil.validate(request);
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ValidationCustomException("Email not found", "email"));
+        String token = jwtService.generateToken(user);
+        user.setResetPasswordToken(token);
+        userRepository.save(user);
+        String subject = "Reset Password";
+        String text = String.format("To reset your password, click the link below:\n http://localhost:3000/api/auth/reset-password?token=%s", token);
+        sendEmail(user.getEmail(), subject, text);
+
+        return "Password reset link sent to your email";
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public String resetPassword(String token, ResetPasswordRequest request) throws BadRequestException {
+        validationUtil.validate(request);
+        if (!jwtService.verifyJwtToken(token)) {
+            throw new BadRequestException("Invalid or expired token");
+        }
+
+        User user = userRepository.findByResetPasswordToken(token)
+                .orElseThrow(() -> new BadRequestException("Invalid token"));
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        user.setPassword(hashedPassword);
+        user.setResetPasswordToken(null);
+        return "Password reset successfully";
     }
 
     private User saveToUserRepository(RegisterRequest user, List<Role> roles) {
@@ -131,5 +166,13 @@ public class AuthServiceImpl implements AuthService {
                 .username(user.getUsername())
                 .roles(rolesName)
                 .build();
+    }
+
+    private void sendEmail(String email, String subject, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject(subject);
+        message.setText(text);
+        mailSender.send(message);
     }
 }
