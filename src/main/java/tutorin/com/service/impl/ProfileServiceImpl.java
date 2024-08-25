@@ -38,7 +38,6 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileResponse getProfile() throws NotFoundException {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
         Profile profile = getProfileByUserId(userId);
         return createProfileResponse(profile);
     }

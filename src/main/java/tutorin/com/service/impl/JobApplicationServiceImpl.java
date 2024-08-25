@@ -35,9 +35,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     @Override
     public List<ListJobApplicationResponse> getJobApplication() {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
         List<JobApplication> jobApplications = jobApplicationRepository.findAllByTutorId(userId);
-
         return jobApplications.stream()
                 .map(this::createListJobApplicationResponse)
                 .toList();

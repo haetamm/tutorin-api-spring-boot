@@ -10,6 +10,7 @@ import lombok.*;
 public class UserRes {
     private String id;
     private String name;
+    private String status;
     private String createdAt;
     private String updatedAt;
 }

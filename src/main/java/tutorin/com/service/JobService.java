@@ -1,5 +1,6 @@
 package tutorin.com.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import tutorin.com.entities.WebResponse;
 import tutorin.com.entities.job.JobRequest;
@@ -12,6 +13,6 @@ import java.util.List;
 public interface JobService {
     JobResponse createJob(JobRequest request) throws NotFoundException;
     JobResponse getJobById(String id) throws NotFoundException;
-    ResponseEntity<WebResponse<List<JobResponse>>> getAllJob(Integer page, Integer size);
+    Page<JobResponse> getAllJob(Integer page, Integer size);
     Job findById(String id) throws NotFoundException;
 }

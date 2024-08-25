@@ -4,15 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.Gender;
-import tutorin.com.constant.StatusMessages;
-import tutorin.com.entities.PaginationResponse;
-import tutorin.com.entities.WebResponse;
 import tutorin.com.entities.job.JobRequest;
 import tutorin.com.entities.job.JobResponse;
 import tutorin.com.exception.NotFoundException;
@@ -23,9 +18,6 @@ import tutorin.com.repository.JobRepository;
 import tutorin.com.service.JobService;
 import tutorin.com.service.UserService;
 import tutorin.com.validation.ValidationUtil;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -68,31 +60,11 @@ public class JobServiceImpl implements JobService {
 
     @Transactional(readOnly = true)
     @Override
-    public ResponseEntity<WebResponse<List<JobResponse>>> getAllJob(Integer page, Integer size) {
+    public Page<JobResponse> getAllJob(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Job> jobPage = jobRepository.findAll(pageable);
-        
-        List<JobResponse> jobResponses = jobPage.stream()
-                .map(this::createJobResponse)
-                .collect(Collectors.toList());
 
-        WebResponse<List<JobResponse>> response = WebResponse.<List<JobResponse>>builder()
-                .code(HttpStatus.OK.value())
-                .status(StatusMessages.SUCCESS_RETRIEVE_LIST)
-                .data(jobResponses)
-                .paginationResponse(
-                        PaginationResponse.builder()
-                                .totalPages(jobPage.getTotalPages())
-                                .totalElements(jobPage.getTotalElements())
-                                .page(page)
-                                .size(size)
-                                .hasNext(jobPage.hasNext())
-                                .hasPrevious(jobPage.hasPrevious())
-                                .build()
-                )
-                .build();
-
-        return ResponseEntity.ok(response);
+        return jobPage.map(this::createJobResponse);
     }
 
     @Transactional(readOnly = true)
