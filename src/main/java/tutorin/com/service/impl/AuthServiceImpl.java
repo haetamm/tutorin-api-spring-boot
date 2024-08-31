@@ -110,7 +110,7 @@ public class AuthServiceImpl implements AuthService {
         user.setResetPasswordToken(token);
         userRepository.save(user);
         String subject = "Reset Password";
-        String text = String.format("To reset your password, click the link below:\n http://localhost:3000/api/auth/reset-password?token=%s", token);
+        String text = String.format("To reset your password, click the link below:\n https://tutorin.netlify.app/reset-password?token=%s", token);
         sendEmail(user.getEmail(), subject, text);
 
         return "Password reset link sent to your email";
@@ -129,7 +129,7 @@ public class AuthServiceImpl implements AuthService {
         String hashedPassword = passwordEncoder.encode(request.getPassword());
         user.setPassword(hashedPassword);
         user.setResetPasswordToken(null);
-        return "Password reset successfully";
+        return "Password reset successfully, please log in.";
     }
 
     private User saveToUserRepository(RegisterRequest user, List<Role> roles) {
