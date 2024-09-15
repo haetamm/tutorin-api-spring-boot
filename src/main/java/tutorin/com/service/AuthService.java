@@ -10,4 +10,7 @@ public interface AuthService {
     LoginResponse login(LoginRequest request);
     String forgetPassword(ForgotPasswordRequest request) throws ValidationCustomException;
     String resetPassword(String token, ResetPasswordRequest request) throws ValidationCustomException, BadRequestException;
+
+    Object socialite(String code, String scope);
+    LoginResponse regUserWithGoogle(RegisterWithGoogleRequest request);
 }

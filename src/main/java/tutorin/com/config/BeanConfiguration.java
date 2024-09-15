@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import tutorin.com.repository.UserRepository;
 import tutorin.com.service.impl.MyUserDetailService;
 
@@ -19,6 +20,11 @@ import java.util.List;
 
 @Configuration
 public class BeanConfiguration {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -30,10 +36,10 @@ public class BeanConfiguration {
         return new ObjectMapper();
     }
 
-    @Bean
-    public RestClient restClient() {
-        return RestClient.create();
-    }
+//    @Bean
+//    public RestClient restClient() {
+//        return RestClient.create();
+//    }
 
     @Bean
     public AuthenticationManager authenticationManager(List<AuthenticationProvider> myAuthenticationProviders) {
