@@ -4,16 +4,24 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.MultipartFilter;
 import tutorin.com.constant.StatusMessages;
+import tutorin.com.entities.image.ImageResponse;
 import tutorin.com.entities.profile.ProfileRequest;
 import tutorin.com.entities.profile.ProfileResponse;
+import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.exception.ValidationCustomException;
+import tutorin.com.model.Image;
 import tutorin.com.model.Profile;
 import tutorin.com.repository.ProfileRepository;
 import tutorin.com.repository.UserRepository;
+import tutorin.com.service.ImageService;
 import tutorin.com.service.ProfileService;
 import tutorin.com.validation.ValidationUtil;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +29,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final ValidationUtil validationUtil;
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
+    private final ImageService imageService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -40,6 +49,30 @@ public class ProfileServiceImpl implements ProfileService {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         Profile profile = getProfileByUserId(userId);
         return createProfileResponse(profile);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ImageResponse upload(MultipartFile imageRequest) throws NotFoundException, BadRequestException, IOException {
+
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Profile profile = getProfileByUserId(userId);
+        Image image = profile.getImage();
+
+        if (image == null) {
+            Image imageResult = imageService.save(imageRequest);
+            profile.setImage(imageResult);
+        } else {
+            Image changeImage = imageService.updateById(image.getId(), imageRequest);
+            profile.setImage(changeImage);
+        }
+
+        profileRepository.save(profile);
+        return ImageResponse.builder()
+                .id(profile.getImage().getId())
+                .name(profile.getImage().getName())
+                .url(profile.getImage().getPath())
+                .build();
     }
 
     private Profile getProfileByUserId(String userId) throws NotFoundException {
