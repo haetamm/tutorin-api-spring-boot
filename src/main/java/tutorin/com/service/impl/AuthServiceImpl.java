@@ -22,6 +22,7 @@ import tutorin.com.constant.UserRoleEnum;
 import tutorin.com.entities.user.*;
 import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.ValidationCustomException;
+import tutorin.com.helper.Utilities;
 import tutorin.com.model.Profile;
 import tutorin.com.model.Role;
 import tutorin.com.model.User;
@@ -109,8 +110,7 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authenticate);
 
         User user = (User) authenticate.getPrincipal();
-        String token = jwtService.generateToken(user);
-        return getLoginResponse(user, token);
+        return getLoginResponse(user);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -167,11 +167,10 @@ public class AuthServiceImpl implements AuthService {
 
             if (user == null) {
                 userInfo.setUsername(userInfo.getEmail().split("@")[0]);
+                userInfo.setTokenAccess(tokenResponse.getAccess_token());
                 return userInfo;
             }
-
-            String token = jwtService.generateToken(user);
-            return getLoginResponse(user, token);
+            return getLoginResponse(user);
 
         } catch (HttpClientErrorException e) {
             System.err.println("Google login error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
@@ -188,20 +187,19 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse regUserWithGoogle(RegisterWithGoogleRequest request) {
         validationUtil.validate(request);
+        GoogleUserInfo userInfo = getProfileDetailsGoogle(request.getTokenAccess());
         UserRoleEnum roleEnum;
         roleEnum = UserRoleEnum.valueOf(request.getRole().toUpperCase());
         Role roles = roleService.saveOrGet(roleEnum);
-        User user = userRepository.saveAndFlush(User.builder()
-                .name(request.getName())
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(request.getPassword())
-                .roles(listOf(roles))
-                .isEnable(true)
-                .build());
+        RegisterRequest tempRegisterRequest = new RegisterRequest(
+                userInfo.getName(),
+                request.getUsername(),
+                userInfo.getEmail(),
+                Utilities.generateRandomString(8)
+        );
+        User user = saveToUserRepository(tempRegisterRequest, listOf(roles));
         saveToProfileRepository(user);
-        String token = jwtService.generateToken(user);
-        return getLoginResponse(user, token);
+        return getLoginResponse(user);
     }
 
     private GoogleUserInfo getProfileDetailsGoogle(String accessToken) {
@@ -225,7 +223,8 @@ public class AuthServiceImpl implements AuthService {
         return params;
     }
 
-    private LoginResponse getLoginResponse(User user, String token) {
+    private LoginResponse getLoginResponse(User user) {
+        String token = jwtService.generateToken(user);
         return LoginResponse.builder()
                 .name(user.getName())
                 .username(user.getUsername())
