@@ -10,5 +10,5 @@ import lombok.*;
 public class ImageResponse {
     private String id;
     private String name;
-    private String url;
+    private String path;
 }

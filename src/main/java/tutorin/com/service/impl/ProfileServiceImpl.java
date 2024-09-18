@@ -68,11 +68,7 @@ public class ProfileServiceImpl implements ProfileService {
         }
 
         profileRepository.save(profile);
-        return ImageResponse.builder()
-                .id(profile.getImage().getId())
-                .name(profile.getImage().getName())
-                .url(profile.getImage().getPath())
-                .build();
+        return createImageResponse(profile);
     }
 
     private Profile getProfileByUserId(String userId) throws NotFoundException {
@@ -118,6 +114,15 @@ public class ProfileServiceImpl implements ProfileService {
                 .city(profile.getCity())
                 .country(profile.getCountry())
                 .postcode(profile.getPostcode())
+                .image(profile.getImage() != null ? createImageResponse(profile) : null)
+                .build();
+    }
+
+    private ImageResponse createImageResponse(Profile profile) {
+        return ImageResponse.builder()
+                .id(profile.getImage().getId())
+                .name(profile.getImage().getName())
+                .path(profile.getImage().getPath())
                 .build();
     }
 }
