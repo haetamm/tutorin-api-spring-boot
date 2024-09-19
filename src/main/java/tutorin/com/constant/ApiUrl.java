@@ -7,4 +7,5 @@ public class ApiUrl {
     public static final String API_JOB = "/jobs";
     public static final String API_JOB_APPLICATION = "/applications";
     public static final String API_NOTIFICATION = "/notifications";
+    public static final String API_USER = "/user";
 }

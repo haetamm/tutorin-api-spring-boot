@@ -75,6 +75,6 @@ public class ProfileController {
             } catch (NotFoundException | BadRequestException | IOException e) {
                 throw new RuntimeException(e);
             }
-        }, HttpStatus.OK, StatusMessages.SUCCESS_CREATE);
+        }, HttpStatus.OK, StatusMessages.SUCCESS_UPDATE);
     }
 }

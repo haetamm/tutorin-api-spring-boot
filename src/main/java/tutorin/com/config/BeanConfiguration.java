@@ -31,15 +31,15 @@ public class BeanConfiguration {
         return new BCryptPasswordEncoder();
     }
 
+    public boolean comparePassword(String password, String encodedPassword) {
+        PasswordEncoder passwordEncoder = passwordEncoder();
+        return passwordEncoder.matches(password, encodedPassword);
+    }
+
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
-
-//    @Bean
-//    public RestClient restClient() {
-//        return RestClient.create();
-//    }
 
     @Bean
     public AuthenticationManager authenticationManager(List<AuthenticationProvider> myAuthenticationProviders) {
