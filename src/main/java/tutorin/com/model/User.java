@@ -24,9 +24,6 @@ public class User  implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
@@ -44,6 +41,14 @@ public class User  implements UserDetails {
 
     @Column(name = "resetPasswordToken", columnDefinition = "TEXT")
     private String resetPasswordToken;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id", referencedColumnName = "id")
+    private Profile profile;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id", unique = true)
+    private Image image;
 
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;

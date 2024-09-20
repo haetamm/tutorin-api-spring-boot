@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import tutorin.com.entities.PaginationResponse;
 import tutorin.com.entities.WebResponse;
+import tutorin.com.entities.image.ImageResponse;
+import tutorin.com.model.Image;
 
 import java.security.SecureRandom;
 import java.util.function.Supplier;
@@ -21,6 +23,17 @@ public class Utilities {
             sb.append(CHARACTERS.charAt(RANDOM.nextInt(CHARACTERS.length())));
         }
         return sb.toString();
+    }
+
+    public static ImageResponse createResponseImage(Image image) {
+        if (image == null) {
+            return null;
+        }
+        return ImageResponse.builder()
+                .id(image.getId())
+                .name(image.getName())
+                .path(image.getPath())
+                .build();
     }
     
     public <T> ResponseEntity<WebResponse<T>> handleRequest(Supplier<T> requestHandler, HttpStatus status, String message, PaginationResponse paginationResponse) {

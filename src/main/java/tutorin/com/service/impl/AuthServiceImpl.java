@@ -80,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
         if (account.isPresent()) return;
         RegisterRequest superAdminRequest = new RegisterRequest(superAdminName, superAdminUsername, superAdminEmail, superAdminPassword);
         Role admin = roleService.saveOrGet(UserRoleEnum.ROLE_ADMIN);
-        saveToUserRepository(superAdminRequest, List.of(admin));
+        saveToUserRepository(superAdminRequest, List.of(admin), null);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -197,8 +197,9 @@ public class AuthServiceImpl implements AuthService {
                 userInfo.getEmail(),
                 Utilities.generateRandomString(8)
         );
-        User user = saveToUserRepository(tempRegisterRequest, listOf(roles));
-        saveToProfileRepository(user);
+        Profile profile = saveToProfileRepository(tempRegisterRequest);
+        User user = saveToUserRepository(tempRegisterRequest, listOf(roles), profile);
+
         return getLoginResponse(user);
     }
 
@@ -226,43 +227,45 @@ public class AuthServiceImpl implements AuthService {
     private LoginResponse getLoginResponse(User user) {
         String token = jwtService.generateToken(user);
         return LoginResponse.builder()
-                .name(user.getName())
+                .name(user.getProfile().getName())
                 .username(user.getUsername())
                 .token(token)
                 .roles(user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
     }
 
-    private User saveToUserRepository(RegisterRequest user, List<Role> roles) {
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
-        return userRepository.saveAndFlush(User.builder()
-                .name(user.getName())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .password(hashedPassword)
-                .roles(roles)
-                .isEnable(true)
-                .build());
-    }
-
     private RegisterResponse getRegisterResponse(RegisterRequest request, List<Role> roles) {
-        User user = saveToUserRepository(request, roles);
-        saveToProfileRepository(user);
+        Profile profile = saveToProfileRepository(request);
+        System.out.println("Profile disimpan: " + profile.getName());
 
-        List<String> rolesName = user.getRoles().stream()
+        User user = saveToUserRepository(request, roles, profile);
+
+        List<String> rolesName = new ArrayList<>(user.getRoles()).stream()
                 .map(role -> role.getRole().name())
                 .toList();
 
         return RegisterResponse.builder()
-                .name(user.getName())
+                .name(user.getProfile().getName())
                 .username(user.getUsername())
                 .roles(rolesName)
                 .build();
     }
 
-    private void saveToProfileRepository(User user) {
+    private User saveToUserRepository(RegisterRequest user, List<Role> roles, Profile profile) {
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        return userRepository.saveAndFlush(User.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .password(hashedPassword)
+                .profile(profile)
+                .roles(roles)
+                .isEnable(true)
+                .build());
+    }
+
+    private Profile saveToProfileRepository(RegisterRequest request) {
         Profile profile = Profile.builder()
-                .user(user)
+                .name(request.getName())
                 .phone("")
                 .address("")
                 .city("")
@@ -270,6 +273,7 @@ public class AuthServiceImpl implements AuthService {
                 .postcode("")
                 .build();
         profileRepository.save(profile);
+        return  profile;
     }
 
     private void sendEmail(String email, String subject, String text) {

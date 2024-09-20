@@ -3,11 +3,15 @@ package tutorin.com.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import tutorin.com.entities.image.ImageResponse;
 import tutorin.com.entities.notification.NotificationJobResponse;
 import tutorin.com.entities.notification.UserRes;
 import tutorin.com.exception.NotFoundException;
+import tutorin.com.helper.Utilities;
+import tutorin.com.model.Image;
 import tutorin.com.model.Job;
 import tutorin.com.model.JobApplication;
+import tutorin.com.model.User;
 import tutorin.com.repository.JobApplicationRepository;
 import tutorin.com.repository.JobRepository;
 import tutorin.com.service.JobService;
@@ -57,13 +61,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private UserRes mapToUserRes(JobApplication jobApplication) {
+        User tutor = jobApplication.getTutor();
         return UserRes.builder()
-                .id(jobApplication.getTutor().getId())
-                .name(jobApplication.getTutor().getName())
+                .id(tutor.getId())
+                .name(tutor.getProfile().getName())
+                .image( Utilities.createResponseImage(tutor.getImage()))
                 .status(String.valueOf(jobApplication.getStatus()))
                 .createdAt(String.valueOf(jobApplication.getCreatedAt()))
                 .updatedAt(String.valueOf(jobApplication.getUpdatedAt()))
                 .build();
     }
+
 }
 

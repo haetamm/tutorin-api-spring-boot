@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.Status;
+import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.job_application.JobApplicationRequest;
 import tutorin.com.entities.job_application.JobApplicationResponse;
 import tutorin.com.entities.job_application.ListJobApplicationResponse;
@@ -75,11 +76,11 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (!userId.equals(job.getStudent().getId())) {
-            throw new AccessDeniedException("You are not authorized to update this job application");
+            throw new AccessDeniedException(StatusMessages.ACCESS_DENIED);
         }
 
         JobApplication jobApplication = jobApplicationRepository.findByJobIdAndTutorId(job.getId(), request.getTutorId())
-                .orElseThrow(() -> new NotFoundException("Job application not found"));
+                .orElseThrow(() -> new NotFoundException(StatusMessages.NOT_FOUND));
 
         Status statusToUpdate = Status.valueOf(request.getStatus());
 
@@ -103,12 +104,13 @@ public class JobApplicationServiceImpl implements JobApplicationService {
     }
 
     private ListJobApplicationResponse createListJobApplicationResponse(JobApplication jobApplication) {
+        Job job = jobApplication.getJob();
         return ListJobApplicationResponse.builder()
-                .jobId(jobApplication.getJob().getId())
-                .title(jobApplication.getJob().getTitle())
-                .subject(jobApplication.getJob().getSubject())
+                .jobId(job.getId())
+                .title(job.getTitle())
+                .subject(job.getSubject())
                 .status(String.valueOf(jobApplication.getStatus()))
-                .deadline(String.valueOf(jobApplication.getJob().getDeadline()))
+                .deadline(String.valueOf(job.getDeadline()))
                 .build();
     }
 }

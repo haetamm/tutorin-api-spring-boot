@@ -10,11 +10,11 @@ import java.util.Optional;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
     List<JobApplication> findAllByTutorId(String tutorId);
+
     List<JobApplication> findAllByJobId(String jobId);
 
     @Query(value = "SELECT * FROM t_job_application WHERE job_id = :jobId AND tutor_id = :tutorId", nativeQuery = true)
     Optional<JobApplication> findByJobIdAndTutorId(@Param("jobId") String jobId, @Param("tutorId") String tutorId);
-
 }
 
 

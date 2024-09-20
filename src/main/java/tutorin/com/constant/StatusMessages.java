@@ -14,6 +14,7 @@ public class StatusMessages {
     public static final String EMAIL_BEEN_TAKEN = "Email has already been taken";
     public static final String USERNAME_BEEN_TAKEN = "Username has already been taken";
     public static final String UNAUTHORIZED = "Unauthorized";
-    public static final String  IMAGE_NOT_FOUND = "Image not found";
+    public static final String IMAGE_NOT_FOUND = "Image not found";
+    public static final String ACCESS_DENIED = "You are not authorized to access this resource.";
 
 }

@@ -21,6 +21,9 @@ public class Profile {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+
     @Column(name = "phone", length = 20)
     private String phone;
 
@@ -36,11 +39,4 @@ public class Profile {
     @Column(name = "postcode", length = 20)
     private String postcode;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", referencedColumnName = "id")
-    private User user;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "image_id", unique = true)
-    private Image image;
 }

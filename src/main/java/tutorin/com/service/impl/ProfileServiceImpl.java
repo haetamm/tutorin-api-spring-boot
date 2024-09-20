@@ -5,7 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.support.MultipartFilter;
 import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.image.ImageResponse;
 import tutorin.com.entities.profile.ProfileRequest;
@@ -13,12 +12,14 @@ import tutorin.com.entities.profile.ProfileResponse;
 import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.exception.ValidationCustomException;
+import tutorin.com.helper.Utilities;
 import tutorin.com.model.Image;
 import tutorin.com.model.Profile;
-import tutorin.com.repository.ProfileRepository;
+import tutorin.com.model.User;
 import tutorin.com.repository.UserRepository;
 import tutorin.com.service.ImageService;
 import tutorin.com.service.ProfileService;
+import tutorin.com.service.UserService;
 import tutorin.com.validation.ValidationUtil;
 
 import java.io.IOException;
@@ -28,27 +29,25 @@ import java.io.IOException;
 public class ProfileServiceImpl implements ProfileService {
     private final ValidationUtil validationUtil;
     private final UserRepository userRepository;
-    private final ProfileRepository profileRepository;
     private final ImageService imageService;
+    private final UserService userService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public ProfileResponse updateProfile(ProfileRequest request) throws NotFoundException, ValidationCustomException {
         validationUtil.validate(request);
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        Profile profile = getProfileByUserId(userId);
-
-        updateUserData(request, profile);
-        profileRepository.save(profile);
-        return createProfileResponse(profile);
+        User user = userService.getByUserId(userId);
+        updateUserData(request, user);
+        return createProfileResponse(user);
     }
 
     @Transactional(readOnly = true)
     @Override
     public ProfileResponse getProfile() throws NotFoundException {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        Profile profile = getProfileByUserId(userId);
-        return createProfileResponse(profile);
+        User user = userService.getByUserId(userId);
+        return createProfileResponse(user);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -56,73 +55,62 @@ public class ProfileServiceImpl implements ProfileService {
     public ImageResponse upload(MultipartFile imageRequest) throws NotFoundException, BadRequestException, IOException {
 
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        Profile profile = getProfileByUserId(userId);
-        Image image = profile.getImage();
+        User user = userService.getByUserId(userId);
+        Image image = user.getImage();
 
         if (image == null) {
             Image imageResult = imageService.save(imageRequest);
-            profile.setImage(imageResult);
+            user.setImage(imageResult);
         } else {
             Image changeImage = imageService.updateById(image.getId(), imageRequest);
-            profile.setImage(changeImage);
+            user.setImage(changeImage);
         }
 
-        profileRepository.save(profile);
-        return createImageResponse(profile);
+        return Utilities.createResponseImage(image);
     }
 
-    private Profile getProfileByUserId(String userId) throws NotFoundException {
-        return profileRepository.findByUserId(userId).orElseThrow(() -> new NotFoundException(StatusMessages.NOT_FOUND));
+    private void updateUserData(ProfileRequest request, User user) throws ValidationCustomException {
+        updateUsernameIfChange(request.getUsername(), user);
+        updateEmailIfChange(request.getEmail(), user);
+        user.getProfile().setName(request.getName());
+        user.getProfile().setPhone(request.getPhone());
+        user.getProfile().setAddress(request.getAddress());
+        user.getProfile().setCity(request.getCity());
+        user.getProfile().setCountry(request.getCountry());
+        user.getProfile().setPostcode(request.getPostcode());
     }
 
-    private void updateUserData(ProfileRequest request, Profile profile) throws ValidationCustomException {
-        updateUsernameIfChange(request.getUsername(), profile);
-        updateEmailIfChange(request.getEmail(), profile);
-        profile.getUser().setName(request.getName());
-        profile.setPhone(request.getPhone());
-        profile.setAddress(request.getAddress());
-        profile.setCity(request.getCity());
-        profile.setCountry(request.getCountry());
-        profile.setPostcode(request.getPostcode());
-    }
-
-    private void updateUsernameIfChange(String newUsername, Profile profile) throws ValidationCustomException {
-        if (newUsername != null && !newUsername.isBlank() && !newUsername.equals(profile.getUser().getUsername())) {
+    private void updateUsernameIfChange(String newUsername, User user) throws ValidationCustomException {
+        if (newUsername != null && !newUsername.isBlank() && !newUsername.equals(user.getUsername())) {
             if (userRepository.existsByUsername(newUsername)) {
                 throw new ValidationCustomException(StatusMessages.USERNAME_BEEN_TAKEN, "username");
             }
-            profile.getUser().setUsername(newUsername);
+            user.setUsername(newUsername);
         }
     }
 
-    private void updateEmailIfChange(String newEmail, Profile profile) throws ValidationCustomException {
-        if (newEmail != null && !newEmail.isBlank() && !newEmail.equals(profile.getUser().getEmail())) {
+    private void updateEmailIfChange(String newEmail, User user) throws ValidationCustomException {
+        if (newEmail != null && !newEmail.isBlank() && !newEmail.equals(user.getEmail())) {
             if (userRepository.existsByEmail(newEmail)) {
                 throw new ValidationCustomException(StatusMessages.EMAIL_BEEN_TAKEN, "email");
             }
-            profile.getUser().setEmail(newEmail);
+            user.setEmail(newEmail);
         }
     }
 
-    private ProfileResponse createProfileResponse(Profile profile) {
+    private ProfileResponse createProfileResponse(User user) {
+        Profile profile = user.getProfile();
+        Image image = user.getImage();
         return ProfileResponse.builder()
-                .name(profile.getUser().getName())
-                .username(profile.getUser().getUsername())
-                .email(profile.getUser().getEmail())
+                .name(profile.getName())
+                .username(user.getUsername())
+                .email(user.getEmail())
                 .phone(profile.getPhone())
                 .address(profile.getAddress())
                 .city(profile.getCity())
                 .country(profile.getCountry())
                 .postcode(profile.getPostcode())
-                .image(profile.getImage() != null ? createImageResponse(profile) : null)
-                .build();
-    }
-
-    private ImageResponse createImageResponse(Profile profile) {
-        return ImageResponse.builder()
-                .id(profile.getImage().getId())
-                .name(profile.getImage().getName())
-                .path(profile.getImage().getPath())
+                .image(Utilities.createResponseImage(image))
                 .build();
     }
 }
