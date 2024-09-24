@@ -1,7 +1,7 @@
 package tutorin.com.entities.profile;
 
 import lombok.*;
-import tutorin.com.entities.image.ImageResponse;
+import tutorin.com.entities.file.FileResponse;
 
 @Setter
 @Getter
@@ -17,5 +17,6 @@ public class ProfileResponse {
     private String city;
     private String country;
     private String postcode;
-    private ImageResponse image;
+    private FileResponse image;
+    private FileResponse resume;
 }

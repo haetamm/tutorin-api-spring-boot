@@ -4,32 +4,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import tutorin.com.constant.StatusMessages;
-import tutorin.com.entities.image.ImageResponse;
 import tutorin.com.entities.profile.ProfileRequest;
 import tutorin.com.entities.profile.ProfileResponse;
-import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.helper.Utilities;
 import tutorin.com.model.Image;
 import tutorin.com.model.Profile;
+import tutorin.com.model.Resume;
 import tutorin.com.model.User;
 import tutorin.com.repository.UserRepository;
-import tutorin.com.service.ImageService;
 import tutorin.com.service.ProfileService;
 import tutorin.com.service.UserService;
 import tutorin.com.validation.ValidationUtil;
-
-import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final ValidationUtil validationUtil;
     private final UserRepository userRepository;
-    private final ImageService imageService;
     private final UserService userService;
 
     @Transactional(rollbackFor = Exception.class)
@@ -50,34 +44,16 @@ public class ProfileServiceImpl implements ProfileService {
         return createProfileResponse(user);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    @Override
-    public ImageResponse upload(MultipartFile imageRequest) throws NotFoundException, BadRequestException, IOException {
-
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.getByUserId(userId);
-        Image image = user.getImage();
-
-        if (image == null) {
-            Image imageResult = imageService.save(imageRequest);
-            user.setImage(imageResult);
-        } else {
-            Image changeImage = imageService.updateById(image.getId(), imageRequest);
-            user.setImage(changeImage);
-        }
-
-        return Utilities.createResponseImage(image);
-    }
-
     private void updateUserData(ProfileRequest request, User user) throws ValidationCustomException {
+        Profile profile = user.getProfile();
         updateUsernameIfChange(request.getUsername(), user);
         updateEmailIfChange(request.getEmail(), user);
-        user.getProfile().setName(request.getName());
-        user.getProfile().setPhone(request.getPhone());
-        user.getProfile().setAddress(request.getAddress());
-        user.getProfile().setCity(request.getCity());
-        user.getProfile().setCountry(request.getCountry());
-        user.getProfile().setPostcode(request.getPostcode());
+        profile.setName(request.getName());
+        profile.setPhone(request.getPhone());
+        profile.setAddress(request.getAddress());
+        profile.setCity(request.getCity());
+        profile.setCountry(request.getCountry());
+        profile.setPostcode(request.getPostcode());
     }
 
     private void updateUsernameIfChange(String newUsername, User user) throws ValidationCustomException {
@@ -101,6 +77,7 @@ public class ProfileServiceImpl implements ProfileService {
     private ProfileResponse createProfileResponse(User user) {
         Profile profile = user.getProfile();
         Image image = user.getImage();
+        Resume resume = user.getResume();
         return ProfileResponse.builder()
                 .name(profile.getName())
                 .username(user.getUsername())
@@ -110,7 +87,8 @@ public class ProfileServiceImpl implements ProfileService {
                 .city(profile.getCity())
                 .country(profile.getCountry())
                 .postcode(profile.getPostcode())
-                .image(Utilities.createResponseImage(image))
+                .image(Utilities.createResponseFile(image))
+                .resume(Utilities.createResponseFile(resume))
                 .build();
     }
 }

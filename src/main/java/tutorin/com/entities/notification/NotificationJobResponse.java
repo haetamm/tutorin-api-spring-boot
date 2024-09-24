@@ -11,7 +11,6 @@ import java.util.List;
 @Builder
 public class NotificationJobResponse {
     private String jobId;
-    private String tutorId;
     private String title;
     private String subject;
     private String deadline;

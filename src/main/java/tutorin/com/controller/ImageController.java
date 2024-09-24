@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,8 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tutorin.com.constant.ApiUrl;
-import tutorin.com.entities.WebResponse;
-import tutorin.com.entities.user.RegisterResponse;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.service.ImageService;
 
@@ -24,7 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @RestController
-@RequestMapping(ApiUrl.API_URL + ApiUrl.API_PROFILE)
+@RequestMapping(ApiUrl.API_URL + ApiUrl.API_USER)
 @RequiredArgsConstructor
 @Tag(name = "Image", description = "Image API")
 public class ImageController {

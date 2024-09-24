@@ -50,6 +50,10 @@ public class User  implements UserDetails {
     @JoinColumn(name = "image_id", unique = true)
     private Image image;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resume_id", unique = true)
+    private Resume resume;
+
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -1,4 +1,4 @@
-package tutorin.com.entities.image;
+package tutorin.com.entities.file;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ImageResponse {
+public class FileResponse {
     private String id;
     private String name;
     private String path;

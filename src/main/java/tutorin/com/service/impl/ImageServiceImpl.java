@@ -29,19 +29,25 @@ public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
 
     @Value("${tutorin_api.image.path}")
-    private String path;
+    private String pathImage;
+
+    @Value("${tutorin_api.resume.path}")
+    private String pathResume;
 
     private Path imagePath;
+    private Path resumePath;
 
     @Transactional(rollbackFor = Exception.class)
     @PostConstruct
     public void initPath() throws IOException {
-        imagePath = Paths.get(path);
-        if (!Files.exists(imagePath)) {
+        imagePath = Paths.get(pathImage);
+        resumePath = Paths.get(pathResume);
+        if (!Files.exists(imagePath) || !Files.exists(resumePath)) {
             try {
                 Files.createDirectories(imagePath);
+                Files.createDirectories(resumePath);
             } catch (IOException e) {
-                String errorMessage = "Failed to create image directory" + path;
+                String errorMessage = "Failed to create image directory" + imagePath + "and" + resumePath;
                 System.err.println(errorMessage);
                 throw new RuntimeException(errorMessage, e);
             }

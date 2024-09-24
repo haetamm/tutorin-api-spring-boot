@@ -9,20 +9,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import tutorin.com.constant.ApiUrl;
 import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.WebResponse;
-import tutorin.com.entities.image.ImageResponse;
 import tutorin.com.entities.profile.ProfileRequest;
 import tutorin.com.entities.profile.ProfileResponse;
-import tutorin.com.exception.BadRequestException;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.exception.ValidationCustomException;
 import tutorin.com.helper.Utilities;
 import tutorin.com.service.ProfileService;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping(ApiUrl.API_URL + ApiUrl.API_PROFILE)
@@ -58,23 +53,5 @@ public class ProfileController {
                 throw new RuntimeException(e);
             }
         }, HttpStatus.OK, StatusMessages.SUCCESS_RETRIEVE);
-    }
-
-    @Operation(summary = "Current user upload profile image")
-    @SecurityRequirement(name = "Authorization")
-    @PreAuthorize("hasAnyRole('ROLE_STUDENT', 'ROLE_TUTOR')")
-    @PutMapping(
-            path = "/image",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<WebResponse<ImageResponse>> uploadProfile(@RequestParam("image") MultipartFile imageRequest) {
-        return utilities.handleRequest(() -> {
-            try {
-                return profileService.upload(imageRequest);
-            } catch (NotFoundException | BadRequestException | IOException e) {
-                throw new RuntimeException(e);
-            }
-        }, HttpStatus.OK, StatusMessages.SUCCESS_UPDATE);
     }
 }

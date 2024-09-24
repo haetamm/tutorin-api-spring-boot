@@ -15,6 +15,9 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     @Query(value = "SELECT * FROM t_job_application WHERE job_id = :jobId AND tutor_id = :tutorId", nativeQuery = true)
     Optional<JobApplication> findByJobIdAndTutorId(@Param("jobId") String jobId, @Param("tutorId") String tutorId);
+
+    @Query(value = "SELECT * FROM t_job_application WHERE job_id = :jobId AND tutor_id = :tutorId AND student_id = :studentId", nativeQuery = true)
+    Optional<JobApplication> findByJobIdAndTutorIdAndStudentId(@Param("jobId") String jobId, @Param("tutorId") String tutorId, @Param("studentId") String studentId);
 }
 
 

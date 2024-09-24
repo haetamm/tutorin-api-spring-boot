@@ -5,8 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import tutorin.com.entities.PaginationResponse;
 import tutorin.com.entities.WebResponse;
-import tutorin.com.entities.image.ImageResponse;
+import tutorin.com.entities.file.FileResponse;
 import tutorin.com.model.Image;
+import tutorin.com.model.Resume;
 
 import java.security.SecureRandom;
 import java.util.function.Supplier;
@@ -25,14 +26,21 @@ public class Utilities {
         return sb.toString();
     }
 
-    public static ImageResponse createResponseImage(Image image) {
-        if (image == null) {
-            return null;
-        }
-        return ImageResponse.builder()
-                .id(image.getId())
-                .name(image.getName())
-                .path(image.getPath())
+    public static FileResponse createResponseFile(Image image) {
+        if (image == null) { return null; }
+        return createResponse(image.getId(), image.getName(), image.getPath());
+    }
+
+    public static FileResponse createResponseFile(Resume resume) {
+        if (resume == null) { return null; }
+        return createResponse(resume.getId(), resume.getName(), resume.getPath());
+    }
+
+    private static FileResponse createResponse(String id, String name, String path) {
+        return FileResponse.builder()
+                .id(id)
+                .name(name)
+                .path(path)
                 .build();
     }
     

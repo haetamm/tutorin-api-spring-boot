@@ -32,6 +32,10 @@ public class JobApplication {
     @JoinColumn(name = "tutorId", referencedColumnName = "id")
     private User tutor;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "studentId", referencedColumnName = "id")
+    private User student;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;

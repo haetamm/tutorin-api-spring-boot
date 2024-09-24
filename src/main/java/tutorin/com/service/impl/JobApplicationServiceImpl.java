@@ -48,7 +48,13 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         validationUtil.validate(request);
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.getByUserId(userId);
+
+        if (user.getResume() == null) {
+            throw new BadRequestException("Please upload your resume first");
+        }
+
         Job job = jobService.findById(request.getJobId());
+        User student = userService.getByUserId(job.getStudent().getId());
 
         Optional<JobApplication> existingApplication = jobApplicationRepository.findByJobIdAndTutorId(job.getId(), user.getId());
         if (existingApplication.isPresent()) {
@@ -58,6 +64,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
         JobApplication jobApplication = JobApplication.builder()
                 .job(job)
                 .tutor(user)
+                .student(student)
                 .status(Status.ACTIVE)
                 .build();
 
@@ -84,8 +91,8 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
         Status statusToUpdate = Status.valueOf(request.getStatus());
 
-        if (statusToUpdate == Status.ACTIVE) {
-            throw new BadRequestException("Job application status cannot be updated to ACTIVE");
+        if (jobApplication.getStatus() != Status.ACTIVE) {
+            throw new BadRequestException("The job application status cannot be updated further.");
         }
 
         jobApplication.setStatus(statusToUpdate);

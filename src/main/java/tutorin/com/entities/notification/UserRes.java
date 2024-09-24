@@ -1,7 +1,7 @@
 package tutorin.com.entities.notification;
 
 import lombok.*;
-import tutorin.com.entities.image.ImageResponse;
+import tutorin.com.entities.file.FileResponse;
 
 @Setter
 @Getter
@@ -11,7 +11,8 @@ import tutorin.com.entities.image.ImageResponse;
 public class UserRes {
     private String id;
     private String name;
-    private ImageResponse image;
+    private FileResponse image;
+    private FileResponse resume;
     private String status;
     private String createdAt;
     private String updatedAt;

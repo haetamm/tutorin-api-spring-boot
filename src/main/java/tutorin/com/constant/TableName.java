@@ -5,6 +5,7 @@ public class TableName {
     public static final String T_USER = "t_user";
     public static final String T_PROFILE = "t_profile";
     public static final String T_IMAGE = "t_image";
+    public static final String T_RESUME = "t_resume";
     public static final String T_JOB = "t_job";
     public static final String T_JOB_APPLICATION = "t_job_application";
 }

@@ -36,7 +36,7 @@ public class SecurityConfiguration {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/socialite").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/profile/*/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/user/*/images").permitAll()
                         .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -3,12 +3,10 @@ package tutorin.com.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import tutorin.com.entities.image.ImageResponse;
 import tutorin.com.entities.notification.NotificationJobResponse;
 import tutorin.com.entities.notification.UserRes;
 import tutorin.com.exception.NotFoundException;
 import tutorin.com.helper.Utilities;
-import tutorin.com.model.Image;
 import tutorin.com.model.Job;
 import tutorin.com.model.JobApplication;
 import tutorin.com.model.User;
@@ -52,7 +50,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         return NotificationJobResponse.builder()
                 .jobId(job.getId())
-                .tutorId(tutors.isEmpty() ? null : tutors.getFirst().getId())
                 .title(job.getTitle())
                 .subject(job.getSubject())
                 .deadline(String.valueOf(job.getDeadline()))
@@ -65,7 +62,8 @@ public class NotificationServiceImpl implements NotificationService {
         return UserRes.builder()
                 .id(tutor.getId())
                 .name(tutor.getProfile().getName())
-                .image( Utilities.createResponseImage(tutor.getImage()))
+                .image( Utilities.createResponseFile(tutor.getImage()))
+                .resume(Utilities.createResponseFile(tutor.getResume()))
                 .status(String.valueOf(jobApplication.getStatus()))
                 .createdAt(String.valueOf(jobApplication.getCreatedAt()))
                 .updatedAt(String.valueOf(jobApplication.getUpdatedAt()))
