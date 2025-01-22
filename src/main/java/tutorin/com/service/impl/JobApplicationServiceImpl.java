@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tutorin.com.constant.Status;
 import tutorin.com.constant.StatusMessages;
+import tutorin.com.entities.job.JobResponse;
 import tutorin.com.entities.job_application.JobApplicationRequest;
 import tutorin.com.entities.job_application.JobApplicationResponse;
 import tutorin.com.entities.job_application.ListJobApplicationResponse;
@@ -24,6 +25,7 @@ import tutorin.com.validation.ValidationUtil;
 
 import java.util.List;
 import java.util.Optional;
+import static tutorin.com.helper.Utilities.createJobResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +46,7 @@ public class JobApplicationServiceImpl implements JobApplicationService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public JobApplicationResponse createJobApplication(JobApplicationRequest request) throws NotFoundException, BadRequestException {
+    public JobResponse createJobApplication(JobApplicationRequest request) throws NotFoundException, BadRequestException {
         validationUtil.validate(request);
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.getByUserId(userId);
@@ -68,9 +70,9 @@ public class JobApplicationServiceImpl implements JobApplicationService {
                 .status(Status.ACTIVE)
                 .build();
 
-        jobApplication = jobApplicationRepository.saveAndFlush(jobApplication);
+        jobApplicationRepository.saveAndFlush(jobApplication);
 
-        return createJobApplicationResponse(jobApplication);
+        return createJobResponse(job, jobApplicationRepository);
     }
 
     @Transactional(rollbackFor = Exception.class)

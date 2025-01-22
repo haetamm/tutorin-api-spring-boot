@@ -3,6 +3,8 @@ package tutorin.com.entities.profile;
 import lombok.*;
 import tutorin.com.entities.file.FileResponse;
 
+import java.util.List;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -19,4 +21,5 @@ public class ProfileResponse {
     private String postcode;
     private FileResponse image;
     private FileResponse resume;
+    private List<String> roles;
 }

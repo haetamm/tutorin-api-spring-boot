@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import tutorin.com.constant.ApiUrl;
 import tutorin.com.constant.StatusMessages;
 import tutorin.com.entities.WebResponse;
+import tutorin.com.entities.job.JobResponse;
 import tutorin.com.entities.job_application.JobApplicationRequest;
 import tutorin.com.entities.job_application.JobApplicationResponse;
 import tutorin.com.entities.job_application.ListJobApplicationResponse;
@@ -43,7 +44,7 @@ public class JobApplicationController {
     @SecurityRequirement(name = "Authorization")
     @PreAuthorize("hasAnyRole('ROLE_TUTOR')")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<WebResponse<JobApplicationResponse>> createJob(@RequestBody JobApplicationRequest request) {
+    public ResponseEntity<WebResponse<JobResponse>> createJob(@RequestBody JobApplicationRequest request) {
         return utilities.handleRequest(() -> {
             try {
                 return jobApplicationService.createJobApplication(request);

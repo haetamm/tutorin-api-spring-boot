@@ -2,12 +2,16 @@ package tutorin.com.helper;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import tutorin.com.entities.PaginationResponse;
 import tutorin.com.entities.WebResponse;
 import tutorin.com.entities.file.FileResponse;
+import tutorin.com.entities.job.JobResponse;
 import tutorin.com.model.Image;
+import tutorin.com.model.Job;
 import tutorin.com.model.Resume;
+import tutorin.com.repository.JobApplicationRepository;
 
 import java.security.SecureRandom;
 import java.util.function.Supplier;
@@ -57,6 +61,28 @@ public class Utilities {
 
     public <T> ResponseEntity<WebResponse<T>> handleRequest(Supplier<T> requestHandler, HttpStatus status, String message) {
         return handleRequest(requestHandler, status, message, null);
+    }
+
+    public static JobResponse createJobResponse(Job job, JobApplicationRepository jobApplicationRepository) {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean hasApplied = jobApplicationRepository.findByJobIdAndTutorId(job.getId(), userId).isPresent();
+
+        return JobResponse.builder()
+                .id(job.getId())
+                .applied(hasApplied)
+                .title(job.getTitle())
+                .subject(job.getSubject())
+                .gender(String.valueOf(job.getGender()))
+                .education(job.getEducation())
+                .deadline(String.valueOf(job.getDeadline()))
+                .address(job.getAddress())
+                .city(job.getCity())
+                .country(job.getCountry())
+                .salary(job.getSalary())
+                .description(job.getDescription())
+                .createdAt(String.valueOf(job.getCreatedAt()))
+                .updatedAt(String.valueOf(job.getUpdatedAt()))
+                .build();
     }
 }
 

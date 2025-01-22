@@ -1,6 +1,7 @@
 package tutorin.com.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,6 +90,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .postcode(profile.getPostcode())
                 .image(Utilities.createResponseFile(image))
                 .resume(Utilities.createResponseFile(resume))
+                .roles(user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
     }
 }

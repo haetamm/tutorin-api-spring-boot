@@ -19,6 +19,8 @@ import tutorin.com.service.JobService;
 import tutorin.com.service.UserService;
 import tutorin.com.validation.ValidationUtil;
 
+import static tutorin.com.helper.Utilities.createJobResponse;
+
 @Service
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
@@ -48,14 +50,14 @@ public class JobServiceImpl implements JobService {
                 .description(request.getDescription())
                 .build());
 
-        return createJobResponse(job);
+        return createJobResponse(job, jobApplicationRepository);
     }
 
     @Transactional(readOnly = true)
     @Override
     public JobResponse getJobById(String id) throws NotFoundException {
         Job job = findById(id);
-        return createJobResponse(job);
+        return createJobResponse(job, jobApplicationRepository);
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +66,7 @@ public class JobServiceImpl implements JobService {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Job> jobPage = jobRepository.findAll(pageable);
 
-        return jobPage.map(this::createJobResponse);
+        return jobPage.map(job -> createJobResponse(job, jobApplicationRepository));
     }
 
     @Transactional(readOnly = true)
@@ -73,24 +75,5 @@ public class JobServiceImpl implements JobService {
         return jobRepository.findById(id).orElseThrow(() -> new NotFoundException("Job not found"));
     }
 
-    private JobResponse createJobResponse(Job job) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        boolean hasApplied = jobApplicationRepository.findByJobIdAndTutorId(job.getId(), userId).isPresent();
-        return JobResponse.builder()
-                .id(job.getId())
-                .applied(hasApplied)
-                .title(job.getTitle())
-                .subject(job.getSubject())
-                .gender(String.valueOf(job.getGender()))
-                .education(job.getEducation())
-                .deadline(String.valueOf(job.getDeadline()))
-                .address(job.getAddress())
-                .city(job.getCity())
-                .country(job.getCountry())
-                .salary(job.getSalary())
-                .description(job.getDescription())
-                .createdAt(String.valueOf(job.getCreatedAt()))
-                .updatedAt(String.valueOf(job.getUpdatedAt()))
-                .build();
-    }
+
 }
